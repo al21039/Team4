@@ -1,6 +1,6 @@
 import java.sql.*;
 import java.util.*;
-public class group3_main {
+public class group4_main {
     public static void main(String[] args) {
         try {
             // PostgreSQLでのデータベースへの接続
