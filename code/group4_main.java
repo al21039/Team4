@@ -13,13 +13,18 @@ public class group4_main {
             String database = "team4";
             String url = "jdbc:postgresql:" + server + database;
             Class.forName("org.postgresql.Driver");
-            Connection con = DriverManager.getConnection(url, "al21014", "bond");
+            String user = "al21039";
+            String password = "bond";
+            Connection con = DriverManager.getConnection(url, user, password);
+            con.setAutoCommit(false);
             Statement stmt = con.createStatement();
             Scanner sc = new Scanner(System.in);
-            String regex = "^[A-Za-z0-9+$]";
+            ResultSet rs;
+            String regex = "^[A-Za-z0-9]+$";
             System.out.println("1:Login, 2:Sign Up");
             System.out.println("Enter 1 or 2");
             String userId, pass;
+            int counter = 0;
             String userStatus = sc.nextLine();
 
             while (true) {
@@ -29,44 +34,46 @@ public class group4_main {
                         System.out.println("-----Login-----");
                         System.out.println("Input Your User ID >");
                         userId = sc.nextLine();
-                        String sql = "select * from user_table where user_id = " + userId;
-                        ResultSet rs = stmt.executeQuery(sql);
+                        String sql = "select * from user_table where user_id like '" + userId + "'";
+                        rs = stmt.executeQuery(sql);
                         // ユーザIDが登録されているものか判別
                         if (!rs.next()) {
                             System.out.println("User ID not Exists");
                             continue;
                         }
-                        String userPass = rs.getString("passward");
-                        while (true) {
-                            System.out.println("Input Your Password");
-                            pass = sc.nextLine();
-                            // 登録されているパスワードと同じか判別
-                            if (userPass.equals(pass)) {
-                                System.out.println("Login Successful");
-                                break;
-                            } else
-                                System.out.println("Wrong Password");
+                        String userPass = rs.getString("password");
+                        System.out.println("Input Your Password");
+                        pass = sc.nextLine();
+                        // 登録されているパスワードと同じか判別
+                        if (userPass.equals(pass)) {
+                            System.out.println("Login Successful");
+                            break;
+                        } else {
+                            System.out.println("Wrong Password");
                         }
                     }
+                    break;
                 }
+
                 // ユーザ登録を行う
                 if (userStatus.equals("2")) {
                     while (true) {
                         System.out.println("-----Sign Up-----");
                         System.out.println("登録したいIDを入力して下さい(英数字10文字まで) >");
                         userId = sc.nextLine();
-
                         // 入力されたユーザIDが英数字のみかどうか判別
                         if (check(regex, userId, 10) == true) {
-                            String sql = "select * from user_table where" + userId;
-                            ResultSet rs = stmt.executeQuery(sql);
+                            String sql = "select * from user_table where user_id like '" + userId + "'";
+                            rs = stmt.executeQuery(sql);
                             // 入力したユーザIDがすでに使われているか判別
                             if (rs.next()) {
                                 System.out.println("User ID already exists");
+                                continue;
                             }
                             break;
-                        } else
+                        } else {
                             System.out.println("Enter Correctly");
+                        }
                     }
                     while (true) {
                         System.out.println("パスワードを決めてください(英数字20文字まで) >");
@@ -76,16 +83,18 @@ public class group4_main {
                         else
                             System.out.println("Enter Correctly");
                     }
-                    String sql = "insert into user_table";
-                    sql += "values";
-                    sql += "('" + userId + "','" + pass + "','0')";
-                    stmt.executeQuery(sql);
+                    String sql = "insert into user_table (user_id, password, money)";
+                    sql += " values";
+                    sql += "('" + userId + "','" + pass + "', 0)";
+                    stmt.executeUpdate(sql);
+                    con.commit();
+
                     break;
                 }
             }
 
             System.out.println(
-                    "This is flea market app.\nPlease enter some command.\nIf you want a hint, type '!help'. ");
+                    "\nThis is flea market app.\nPlease enter some command.\nIf you want a hint, type '!help'. ");
 
             while (true) {
                 String input = sc.nextLine();
@@ -98,7 +107,7 @@ public class group4_main {
                 if ("!listing".equals(input)) {
                     System.out.println("Input your merchandise");
                     String merchandise = sc.nextLine();
-                    System.out.println("Input Selling price");
+                    System.out.println("Input Selling price (yen)");
                     String price = sc.nextLine();
                     System.out.println("Input merchandise comment (No need to input)");
                     String comment = sc.nextLine();
@@ -106,26 +115,48 @@ public class group4_main {
                     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm");
                     String listing_date = dtf.format(nowDate);
                     String sql = "select count(*) as cnt from listing";
-                    ResultSet rs = stmt.executeQuery(sql);
-                    String count = rs.getString("cnt");
-                    int numberOfMerchandise = Integer.parseInt(count);
-                    numberOfMerchandise++;
-                    sql = "insert into user_table(listing_code,seller,merchandise,price,comment,listing_date)";
+                    rs = stmt.executeQuery(sql);
+                    while (rs.next()) {
+                        counter = rs.getInt("cnt");
+                    }
+                    counter++;
+                    sql = "insert into listing (listing_code, seller, merchandise, price,comment, listing_date)";
                     sql += "values";
-                    sql += "('" + String.format("%08d", numberOfMerchandise) + "','" + userId + "','" + merchandise
-                            + "','" + price + "','" + comment + "','" + listing_date + "')";
-                    stmt.executeQuery(sql);
+                    sql += "('" + String.format("%08d", counter) + "','" + userId + "','" + merchandise
+                            + "'," + price + ",'" + comment + "','" + listing_date + "')";
+                    stmt.executeUpdate(sql);
+                    con.commit();
+                    System.out.println("Listing Successful");
                 }
 
                 // ユーザの出品状況の確認
                 if ("!lhis".equals(input)) {
-                    String sql = "select listing_code, merchandise, price, listing_date from listing where seller = "
-                            + userId;
-                    ResultSet rs = stmt.executeQuery(sql);
-                    while (rs.next()) {
-                        System.out.println(rs.getString("listing_code") + "\t" + rs.getString("merchandise") + "\t"
-                                + rs.getInt("price") + "\t" + rs.getString("listing_date"));
+                    String sql = "select listing_code, merchandise, price, listing_date from listing where seller like' "
+                            + userId + "'";
+                    rs = stmt.executeQuery(sql);
+                    if (!rs.next()) {
+                        System.out.println("you are not listing");
+                    } else {
+                        while (rs.next()) {
+                            String code = rs.getString("listing_code");
+                            String item = rs.getString("merchandise");
+                            int price = rs.getInt("price");
+                            String date = rs.getString("listing_date");
+                            System.out.println(code + "\t" + item + "\t" + price + "\t" + date);
+                        }
+                        System.out.println("\n");
                     }
+                }
+                // user_idとお金を表示
+                if ("!user".equals(input)) {
+                    int money = 0;
+                    System.out.println("user ID : " + userId);
+                    String sql = "select money from user_table where user_id like '" + userId + "'";
+                    rs = stmt.executeQuery(sql);
+                    while (rs.next()) {
+                        money = rs.getInt("money");
+                    }
+                    System.out.println("money : " + money);
                 }
 
                 if ("!exit".equals(input)) {
@@ -145,8 +176,9 @@ public class group4_main {
 
     public static boolean check(String regex, String text, int length) {
         boolean result = true;
-        if (text == null || text.isEmpty() || text.length() > length)
+        if (text == null || text.isEmpty() || text.length() > length) {
             return false;
+        }
         Pattern ptn = Pattern.compile(regex);
         Matcher mtr = ptn.matcher(text);
         result = mtr.matches();
