@@ -1,3 +1,4 @@
+import java.nio.charset.Charset;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -131,20 +132,25 @@ public class group4_main {
 
                 // ユーザの出品状況の確認
                 if ("!lhis".equals(input)) {
-                    String sql = "select listing_code, merchandise, price, listing_date from listing where seller like' "
+                    String sql = "select listing_code, merchandise, price, listing_date from listing where seller like '"
                             + userId + "'";
+                    System.out.println(sql);
                     rs = stmt.executeQuery(sql);
                     if (!rs.next()) {
                         System.out.println("you are not listing");
                     } else {
+                        rs = stmt.executeQuery(sql);
+                        System.out.println(format("code", 8) + " | " + format("merchandise", 50) + " | "
+                                + format("price", 12) + " | " + format("listing_date", 16));
                         while (rs.next()) {
                             String code = rs.getString("listing_code");
                             String item = rs.getString("merchandise");
-                            int price = rs.getInt("price");
+                            String price = rs.getString("price");
                             String date = rs.getString("listing_date");
-                            System.out.println(code + "\t" + item + "\t" + price + "\t" + date);
+                            System.out
+                                    .println(
+                                            code + " | " + format(item, 50) + " | " + format(price, 12) + " | " + date);
                         }
-                        System.out.println("\n");
                     }
                 }
                 // user_idとお金を表示
@@ -183,5 +189,14 @@ public class group4_main {
         Matcher mtr = ptn.matcher(text);
         result = mtr.matches();
         return result;
+    }
+
+    private static String format(String target, int length) {
+        int byteDiff = (getByteLength(target, Charset.forName("UTF-8")) - target.length()) / 2;
+        return String.format("%-" + (length - byteDiff) + "s", target);
+    }
+
+    private static int getByteLength(String string, Charset charset) {
+        return string.getBytes(charset).length;
     }
 }
