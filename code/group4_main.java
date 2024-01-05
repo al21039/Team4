@@ -60,7 +60,7 @@ public class group4_main {
                 if (userStatus.equals("2")) {
                     while (true) {
                         System.out.println("-----Sign Up-----");
-                        System.out.println("登録したいIDを入力して下さい(英数字10文字まで) >");
+                        System.out.println("Enter the ID to register(Up to 10 alphanumeric characters) >");
                         userId = sc.nextLine();
                         // 入力されたユーザIDが英数字のみかどうか判別
                         if (check(regex, userId, 10) == true) {
@@ -77,7 +77,7 @@ public class group4_main {
                         }
                     }
                     while (true) {
-                        System.out.println("パスワードを決めてください(英数字20文字まで) >");
+                        System.out.println("Choose a password(Up to 20 alphanumeric characters) >");
                         pass = sc.nextLine();
                         if (check(regex, pass, 20) == true)
                             break;
