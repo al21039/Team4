@@ -47,7 +47,7 @@ public class group4_main {
 
                 if ("!login".equals(input)){
                     if(islogin==true){
-                        System.out.plintln("ログイン済です");
+                        System.out.println("ログイン済です");
                     }else{
                         islogin=true;
                         System.out.println("loginコマンド");
@@ -125,7 +125,6 @@ public class group4_main {
                     System.out.printf("%s>",user);
                 }else{
                     System.out.printf("未ログイン>");
-
                 }
 
             }

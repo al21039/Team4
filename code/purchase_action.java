@@ -26,8 +26,27 @@ public class purchase_action {
                 spd = rs.getString("purchase_date");
                 System.out.println(slc+" "+sseller+" "+smerchandise+" "+sprice+" "+scomment+" "+sld+" "+sbuyer+" "+spd);
             }
-        }catch(Exception e){
+
+            
             e.printStackTrace();
         }
     }
+     public void procedure(){
+        try{
+            System.out.println("購入したい商品の番号を入力してください。購入をキャンセルする場合は「!cancel」と入力してください。");
+            while(true){
+                int input = sc.nextInt();
+                if(input==0){
+                    System.out.println("購入がキャンセルされました。");
+                    break;
+                }else{
+
+                }
+            }
+        }catch(InputMismatchExceptuon e){
+            System.out.println("数値以外が入力されました。購入したい商品の番号を入力してください。購入をキャンセルする場合は「0」を入力してください。")
+        }catch(Exception e){
+            e.printStacktrace();
+        }
+
 }
